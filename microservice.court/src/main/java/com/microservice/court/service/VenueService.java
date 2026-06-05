@@ -4,6 +4,7 @@ import com.microservice.court.dto.*;
 
 import com.microservice.court.entity.*;
 
+import com.microservice.court.feign.AuthClient;
 import com.microservice.court.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class VenueService {
-
+    @Autowired
+    private AuthClient authClient;
     @Autowired
     private VenueRepository venueRepository;
 
@@ -208,15 +210,24 @@ public class VenueService {
         response.setIdVenue(
                 venue.getIdVenue()
         );
-
+        response.setName (
+                venue.getName() );
         response.setOwnerAccountId(
                 venue.getOwnerAccountId()
         );
 
-        response.setName(
-                venue.getName()
-        );
+        OwnerResponse owner=
+                authClient.getOwner(
+                        venue.getOwnerAccountId()
+                );
 
+        response.setOwnerName(
+
+                owner.getFirstName()
+                        +" "
+                        +owner.getLastName()
+
+        );
         response.setAddress(
                 venue.getAddress()
         );

@@ -1,14 +1,11 @@
 package com.microservice.court.service;
 
 import com.microservice.court.dto.*;
-
 import com.microservice.court.entity.*;
-
 import com.microservice.court.repository.*;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,26 +20,21 @@ public class SportCourtService {
     @Autowired
     private SportCourtImageRepository imageRepository;
 
-    public List<SportCourtResponse>
-    getAllSportCourts(
-            Integer venueId){
+    public List<SportCourtResponse> getAllSportCourts(Integer venueId) {
 
         List<SportCourt> courts;
 
-        if(venueId!=null){
+        if (venueId != null) {
 
-            courts=
-                    sportCourtRepository
-                            .findByVenueIdAndIsActiveTrue(
-                                    venueId
-                            );
+            courts = sportCourtRepository
+                    .findByVenueIdAndIsActiveTrue(
+                            venueId
+                    );
 
-        }
-        else{
+        } else {
 
-            courts=
-                    sportCourtRepository
-                            .findByIsActiveTrue();
+            courts = sportCourtRepository
+                    .findByIsActiveTrue();
 
         }
 
@@ -52,12 +44,10 @@ public class SportCourtService {
 
     }
 
-
     public SportCourtResponse createSportCourt(
-            SportCourtRequest request){
+            SportCourtRequest request) {
 
-        SportCourt court=
-                new SportCourt();
+        SportCourt court = new SportCourt();
 
         court.setVenueId(
                 request.getVenueId()
@@ -68,7 +58,7 @@ public class SportCourtService {
                 court
         );
 
-        SportCourt saved=
+        SportCourt saved =
                 sportCourtRepository
                         .save(court);
 
@@ -78,16 +68,15 @@ public class SportCourtService {
 
     }
 
-
     public SportCourtResponse updateSportCourt(
             Integer id,
-            SportCourtRequest request){
+            SportCourtRequest request) {
 
-        SportCourt court=
+        SportCourt court =
                 sportCourtRepository
                         .findById(id)
                         .orElseThrow(
-                                ()->new RuntimeException(
+                                () -> new RuntimeException(
                                         "Cancha no encontrada"
                                 )
                         );
@@ -106,10 +95,8 @@ public class SportCourtService {
     }
 
     private void mapRequestToEntity(
-
             SportCourtRequest request,
-
-            SportCourt court){
+            SportCourt court) {
 
         court.setName(
                 request.getName()
@@ -139,14 +126,47 @@ public class SportCourtService {
                 request.getRate()
         );
 
+        if (request.getHasRoof() != null) {
+
+            court.setHasRoof(
+                    request.getHasRoof()
+            );
+
+        }
+
+        if (request.getHasLighting() != null) {
+
+            court.setHasLighting(
+                    request.getHasLighting()
+            );
+
+        }
+
+        if (request.getSlotMinutes() != null) {
+
+            court.setSlotMinutes(
+                    request.getSlotMinutes()
+            );
+
+        }
+
+        if (request.getPlayMinutes() != null) {
+
+            court.setPlayMinutes(
+                    request.getPlayMinutes()
+            );
+
+        }
+
+        if (court.getIsActive() == null) {
+            court.setIsActive(true);
+        }
     }
 
+    private SportCourtResponse convertToResponse(
+            SportCourt court) {
 
-    private SportCourtResponse
-    convertToResponse(
-            SportCourt court){
-
-        SportCourtResponse response=
+        SportCourtResponse response =
                 new SportCourtResponse();
 
         response.setIdSportCourt(
@@ -181,28 +201,52 @@ public class SportCourtService {
                 court.getRate()
         );
 
+        response.setRules(
+                court.getRules()
+        );
+
+        response.setHasRoof(
+                court.getHasRoof()
+        );
+
+        response.setHasLighting(
+                court.getHasLighting()
+        );
+
+        response.setSlotMinutes(
+                court.getSlotMinutes()
+        );
+
+        response.setPlayMinutes(
+                court.getPlayMinutes()
+        );
+
+        response.setIsActive(
+                court.getIsActive()
+        );
+
         return response;
 
     }
-    public SportCourtDetailResponse
-    getCourtDetail(
-            Integer id){
 
-        SportCourt court=
+    public SportCourtDetailResponse getCourtDetail(
+            Integer id) {
+
+        SportCourt court =
                 sportCourtRepository
                         .findById(id)
                         .orElseThrow(
-                                ()->new RuntimeException(
+                                () -> new RuntimeException(
                                         "Cancha no encontrada"
                                 )
                         );
 
-        SportCourtResponse baseResponse=
+        SportCourtResponse baseResponse =
                 convertToResponse(
                         court
                 );
 
-        SportCourtDetailResponse detail=
+        SportCourtDetailResponse detail =
                 new SportCourtDetailResponse();
 
         BeanUtils.copyProperties(
@@ -214,16 +258,14 @@ public class SportCourtService {
 
     }
 
-
-
     public void deleteSportCourt(
-            Integer id){
+            Integer id) {
 
-        SportCourt court=
+        SportCourt court =
                 sportCourtRepository
                         .findById(id)
                         .orElseThrow(
-                                ()->new RuntimeException(
+                                () -> new RuntimeException(
                                         "Cancha no encontrada"
                                 )
                         );
@@ -232,11 +274,9 @@ public class SportCourtService {
                 false
         );
 
-        sportCourtRepository
-                .save(
-                        court
-                );
+        sportCourtRepository.save(
+                court
+        );
 
     }
-
 }
