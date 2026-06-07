@@ -1,27 +1,20 @@
 package com.microservice.auth.controller;
 
 import com.microservice.auth.service.AccountService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/account")
+@RequiredArgsConstructor
 public class AccountController {
 
-    @Autowired
-    private AccountService service;
+    private final AccountService accountService;
 
     @DeleteMapping("/{id}")
-    public void deleteAccount(
-
-            @PathVariable
-            Integer id){
-
-        service.deleteAccount(
-                id
-        );
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(@PathVariable Integer id) {
+        accountService.deleteAccount(id);
     }
-
 }

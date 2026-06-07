@@ -2,39 +2,23 @@ package com.microservice.auth.service;
 
 import com.microservice.auth.entity.Account;
 import com.microservice.auth.repository.AccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
-    public void deleteAccount(Integer id){
+    public void deleteAccount(Integer accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada con id: " + accountId));
 
-        Account account=
-                accountRepository
-                .findById(id)
-                .orElseThrow(
-                        ()->new RuntimeException(
-                                "Cuenta no encontrada"
-                        )
-                );
-
-        account.setStatus(
-                "DELETED"
-        );
-
-        account.setUpdatedAt(
-                LocalDateTime.now()
-        );
-
-        accountRepository.save(
-                account
-        );
+        account.setStatus("DELETED");
+        account.setUpdatedAt(LocalDateTime.now());
+        accountRepository.save(account);
     }
-
 }

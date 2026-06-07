@@ -1,22 +1,11 @@
 package com.microservice.auth.dto;
 
-import lombok.*;
-
-@Data
-@AllArgsConstructor
-
-public class LoginResponse {
-    private Integer accountId;
-    private String email;
-    private String role;
-    private String firstName;
-    private String lastName;
-    private Integer profileId;
-
-    public LoginResponse(String loginOk) {
-    }
-
-    public LoginResponse() {
-
-    }
-}
+public record LoginResponse(
+        Integer accountId,
+        String email,
+        String role,
+        String firstName,
+        String lastName,
+        Integer profileId,
+        String token
+) {}

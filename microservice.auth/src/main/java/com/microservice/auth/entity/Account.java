@@ -1,9 +1,9 @@
 package com.microservice.auth.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,34 +16,26 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idAccount;
 
-    @Column(unique=true,
-            nullable=false,
-            length=120)
+    @Column(unique = true, nullable = false, length = 120)
     private String email;
 
-    @JsonIgnore
-    @Column(name="password_hash",
-            nullable=false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
+    @Column(nullable = false)
     private Role role;
 
-    @Column(nullable=false)
-    private String status="ACTIVE";
+    @Column(nullable = false)
+    private String status = "ACTIVE";
 
-    private Boolean emailVerified=false;
+    private Boolean emailVerified = false;
 
-    @Column(
-            name="created_at",
-            updatable=false
-    )
-    private LocalDateTime createdAt=
-            LocalDateTime.now();
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name="updated_at")
-    private LocalDateTime updatedAt=
-            LocalDateTime.now();
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
+    public Account(){}
 }
