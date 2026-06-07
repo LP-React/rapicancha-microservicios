@@ -1,4 +1,4 @@
-package com.microservice.auth.dto;
+package com.microservice.auth.owner.dto;
 
 public record OwnerProfileResponse(
         Integer accountId,

@@ -1,5 +1,6 @@
-package com.microservice.auth.entity;
+package com.microservice.auth.account;
 
+import com.microservice.auth.account.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

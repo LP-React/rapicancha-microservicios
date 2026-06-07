@@ -1,5 +1,6 @@
-package com.microservice.auth.entity;
+package com.microservice.auth.owner;
 
+import com.microservice.auth.account.Account;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

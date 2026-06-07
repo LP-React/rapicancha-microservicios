@@ -1,4 +1,4 @@
-package com.microservice.auth.dto;
+package com.microservice.auth.customer.dto;
 
 public record CustomerProfileResponse(
         Integer accountId,

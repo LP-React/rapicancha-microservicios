@@ -1,6 +1,6 @@
-package com.microservice.auth.controller;
+package com.microservice.auth.account;
 
-import com.microservice.auth.service.AccountService;
+import com.microservice.auth.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

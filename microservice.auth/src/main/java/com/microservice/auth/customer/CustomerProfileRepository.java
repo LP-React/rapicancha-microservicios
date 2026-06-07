@@ -1,6 +1,6 @@
-package com.microservice.auth.repository;
+package com.microservice.auth.customer;
 
-import com.microservice.auth.entity.CustomerProfile;
+import com.microservice.auth.customer.CustomerProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

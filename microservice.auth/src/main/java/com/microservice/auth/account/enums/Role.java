@@ -1,4 +1,4 @@
-package com.microservice.auth.entity;
+package com.microservice.auth.account.enums;
 
 public enum Role {
     CUSTOMER,

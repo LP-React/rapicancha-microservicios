@@ -1,12 +1,15 @@
-package com.microservice.auth.service;
+package com.microservice.auth.auth;
 
-import com.microservice.auth.dto.LoginRequest;
-import com.microservice.auth.dto.LoginResponse;
-import com.microservice.auth.dto.RegisterRequest;
-import com.microservice.auth.dto.RegisterResponse;
-import com.microservice.auth.entity.Account;
-import com.microservice.auth.entity.Role;
-import com.microservice.auth.repository.AccountRepository;
+import com.microservice.auth.auth.dto.LoginRequest;
+import com.microservice.auth.auth.dto.LoginResponse;
+import com.microservice.auth.auth.dto.RegisterRequest;
+import com.microservice.auth.auth.dto.RegisterResponse;
+import com.microservice.auth.account.Account;
+import com.microservice.auth.account.enums.Role;
+import com.microservice.auth.account.AccountRepository;
+import com.microservice.auth.customer.CustomerService;
+import com.microservice.auth.owner.OwnerService;
+import com.microservice.auth.security.JwtService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +22,8 @@ import java.util.Map;
 public class AuthService {
 
     private final AccountRepository accountRepository;
-    private final ProfileService profileService;
+    private final CustomerService customerService;
+    private final OwnerService ownerService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -60,11 +64,11 @@ public class AuthService {
 
     private void createProfile(Account account, RegisterRequest request) {
         if (account.getRole() == Role.CUSTOMER) {
-            profileService.createCustomerProfile(
+            customerService.createCustomerProfile(
                     account, request.firstName(), request.lastName(), request.phone()
             );
         } else if (account.getRole() == Role.OWNER) {
-            profileService.createOwnerProfile(
+            ownerService.createOwnerProfile(
                     account, request.firstName(), request.lastName(), request.phone(), request.nationalId()
             );
         }
@@ -93,14 +97,29 @@ public class AuthService {
     }
 
     private LoginResponse buildLoginResponse(Account account, String token) {
-        ProfileService.ProfileInfo info = profileService.getProfileInfo(account.getIdAccount(), account.getRole());
+        String firstName = null;
+        String lastName = null;
+        Integer profileId = null;
+
+        if (account.getRole() == Role.OWNER) {
+            var info = ownerService.getProfileInfo(account.getIdAccount());
+            firstName = info.firstName();
+            lastName = info.lastName();
+            profileId = info.profileId();
+        } else if (account.getRole() == Role.CUSTOMER) {
+            var info = customerService.getProfileInfo(account.getIdAccount());
+            firstName = info.firstName();
+            lastName = info.lastName();
+            profileId = info.profileId();
+        }
+
         return new LoginResponse(
                 account.getIdAccount(),
                 account.getEmail(),
                 account.getRole().name(),
-                info.firstName(),
-                info.lastName(),
-                info.profileId(),
+                firstName,
+                lastName,
+                profileId,
                 token
         );
     }

@@ -1,6 +1,6 @@
-package com.microservice.auth.dto;
+package com.microservice.auth.auth.dto;
 
-import com.microservice.auth.entity.Role;
+import com.microservice.auth.account.enums.Role;
 
 import java.time.LocalDateTime;
 

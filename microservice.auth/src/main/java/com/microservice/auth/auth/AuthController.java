@@ -1,10 +1,9 @@
-package com.microservice.auth.controller;
+package com.microservice.auth.auth;
 
-import com.microservice.auth.dto.LoginRequest;
-import com.microservice.auth.dto.LoginResponse;
-import com.microservice.auth.dto.RegisterRequest;
-import com.microservice.auth.dto.RegisterResponse;
-import com.microservice.auth.service.AuthService;
+import com.microservice.auth.auth.dto.LoginRequest;
+import com.microservice.auth.auth.dto.LoginResponse;
+import com.microservice.auth.auth.dto.RegisterRequest;
+import com.microservice.auth.auth.dto.RegisterResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
