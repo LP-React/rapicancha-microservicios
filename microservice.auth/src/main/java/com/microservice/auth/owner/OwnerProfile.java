@@ -13,7 +13,7 @@ public class OwnerProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer accountId;
+    private Integer Id;
 
     @OneToOne
     @JoinColumn(name = "account_id")

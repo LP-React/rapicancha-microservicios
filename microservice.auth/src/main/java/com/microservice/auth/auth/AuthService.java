@@ -92,7 +92,7 @@ public class AuthService {
     private Map<String, Object> buildClaims(Account account) {
         return Map.of(
                 "role", account.getRole().name(),
-                "accountId", account.getIdAccount()
+                "accountId", account.getId()
         );
     }
 
@@ -102,19 +102,19 @@ public class AuthService {
         Integer profileId = null;
 
         if (account.getRole() == Role.OWNER) {
-            var info = ownerService.getProfileInfo(account.getIdAccount());
+            var info = ownerService.getProfileInfo(account.getId());
             firstName = info.firstName();
             lastName = info.lastName();
             profileId = info.profileId();
         } else if (account.getRole() == Role.CUSTOMER) {
-            var info = customerService.getProfileInfo(account.getIdAccount());
+            var info = customerService.getProfileInfo(account.getId());
             firstName = info.firstName();
             lastName = info.lastName();
             profileId = info.profileId();
         }
 
         return new LoginResponse(
-                account.getIdAccount(),
+                account.getId(),
                 account.getEmail(),
                 account.getRole().name(),
                 firstName,
@@ -126,7 +126,7 @@ public class AuthService {
 
     private RegisterResponse toRegisterResponse(Account account) {
         return new RegisterResponse(
-                account.getIdAccount(),
+                account.getId(),
                 account.getEmail(),
                 account.getRole(),
                 account.getStatus(),

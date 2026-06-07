@@ -24,7 +24,7 @@ public class CustomerService {
     public CustomerProfileResponse getCustomer(Integer accountId) {
         CustomerProfile customer = findCustomerOrThrow(accountId);
         return new CustomerProfileResponse(
-                customer.getAccountId(),
+                customer.getId(),
                 customer.getAccount().getEmail(),
                 customer.getFirstName(),
                 customer.getLastName(),
@@ -37,7 +37,7 @@ public class CustomerService {
         customer.setFirstName(request.firstName());
         customer.setLastName(request.lastName());
         customer.setPhone(request.phone());
-        return getCustomer(customerRepository.save(customer).getAccountId());
+        return getCustomer(customerRepository.save(customer).getId());
     }
 
     public CustomerProfile findCustomerOrThrow(Integer accountId) {
@@ -47,7 +47,7 @@ public class CustomerService {
 
     public ProfileInfo getProfileInfo(Integer accountId) {
         return customerRepository.findById(accountId)
-                .map(c -> new ProfileInfo(c.getFirstName(), c.getLastName(), c.getAccountId()))
+                .map(c -> new ProfileInfo(c.getFirstName(), c.getLastName(), c.getId()))
                 .orElse(new ProfileInfo(null, null, null));
     }
 
