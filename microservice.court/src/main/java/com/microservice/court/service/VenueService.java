@@ -1,0 +1,412 @@
+package com.microservice.court.service;
+
+import com.microservice.court.dto.*;
+
+import com.microservice.court.entity.*;
+
+import com.microservice.court.feign.AuthClient;
+import com.microservice.court.repository.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class VenueService {
+    @Autowired
+    private AuthClient authClient;
+    @Autowired
+    private VenueRepository venueRepository;
+
+
+    public List<VenueResponse>
+    getAllVenues(){
+
+        return venueRepository
+                .findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+
+    }
+
+
+    public VenueResponse createVenue(
+            VenueRequest request){
+
+        Venue venue=
+                new Venue();
+
+        venue.setOwnerAccountId(
+                request.getOwnerAccountId()
+        );
+
+        mapRequestToEntity(
+                request,
+                venue
+        );
+
+        return convertToResponse(
+                venueRepository.save(
+                        venue
+                )
+        );
+
+    }
+
+
+    private void mapRequestToEntity(
+
+            VenueRequest request,
+
+            Venue venue){
+
+        venue.setName(
+                request.getName()
+        );
+
+        venue.setAddress(
+                request.getAddress()
+        );
+
+        venue.setLatitude(
+                request.getLatitude()
+        );
+
+        venue.setLongitude(
+                request.getLongitude()
+        );
+
+        venue.setDescription(
+                request.getDescription()
+        );
+
+        venue.setBannerImageUrl(
+                request.getBannerImageUrl()
+        );
+
+        venue.setProvidesEquipment(
+
+                request.getProvidesEquipment()!=null ?
+
+                        request.getProvidesEquipment()
+
+                        :
+
+                        false
+        );
+
+        venue.setOpenTime(
+                request.getOpenTime()
+        );
+
+        venue.setCloseTime(
+                request.getCloseTime()
+        );
+
+        venue.setMaxCapacity(
+                request.getMaxCapacity()
+        );
+
+        venue.setParkingCapacity(
+
+                request.getParkingCapacity()!=null ?
+
+                        request.getParkingCapacity()
+
+                        :
+
+                        0
+        );
+
+        venue.setHasParking(
+
+                request.getHasParking()!=null ?
+
+                        request.getHasParking()
+
+                        :
+
+                        false
+        );
+
+        venue.setHasLockerRoom(
+
+                request.getHasLockerRoom()!=null ?
+
+                        request.getHasLockerRoom()
+
+                        :
+
+                        false
+        );
+
+        venue.setHasRestroom(
+
+                request.getHasRestroom()!=null ?
+
+                        request.getHasRestroom()
+
+                        :
+
+                        true
+        );
+
+        venue.setHasStore(
+
+                request.getHasStore()!=null ?
+
+                        request.getHasStore()
+
+                        :
+
+                        false
+        );
+
+        venue.setHasShower(
+
+                request.getHasShower()!=null ?
+
+                        request.getHasShower()
+
+                        :
+
+                        false
+        );
+
+        venue.setProvidesBalls(
+
+                request.getProvidesBalls()!=null ?
+
+                        request.getProvidesBalls()
+
+                        :
+
+                        false
+        );
+
+        venue.setProvidesBibs(
+
+                request.getProvidesBibs()!=null ?
+
+                        request.getProvidesBibs()
+
+                        :
+
+                        false
+        );
+
+    }
+    private VenueResponse
+    convertToResponse(
+            Venue venue){
+
+        VenueResponse response=
+                new VenueResponse();
+
+        response.setIdVenue(
+                venue.getIdVenue()
+        );
+        response.setName (
+                venue.getName() );
+        response.setOwnerAccountId(
+                venue.getOwnerAccountId()
+        );
+
+        OwnerResponse owner=
+                authClient.getOwner(
+                        venue.getOwnerAccountId()
+                );
+
+        response.setOwnerName(
+
+                owner.getFirstName()
+                        +" "
+                        +owner.getLastName()
+
+        );
+        response.setAddress(
+                venue.getAddress()
+        );
+
+        response.setLatitude(
+                venue.getLatitude()
+        );
+
+        response.setLongitude(
+                venue.getLongitude()
+        );
+
+        response.setDescription(
+                venue.getDescription()
+        );
+
+        response.setBannerImageUrl(
+                venue.getBannerImageUrl()
+        );
+
+        response.setProvidesEquipment(
+                venue.getProvidesEquipment()
+        );
+
+        response.setOpenTime(
+                venue.getOpenTime()
+        );
+
+        response.setCloseTime(
+                venue.getCloseTime()
+        );
+
+        response.setMaxCapacity(
+                venue.getMaxCapacity()
+        );
+
+        response.setParkingCapacity(
+                venue.getParkingCapacity()
+        );
+
+        response.setHasParking(
+                venue.getHasParking()
+        );
+
+        response.setHasLockerRoom(
+                venue.getHasLockerRoom()
+        );
+
+        response.setHasRestroom(
+                venue.getHasRestroom()
+        );
+
+        response.setHasStore(
+                venue.getHasStore()
+        );
+
+        response.setHasShower(
+                venue.getHasShower()
+        );
+
+        response.setProvidesBalls(
+                venue.getProvidesBalls()
+        );
+
+        response.setProvidesBibs(
+                venue.getProvidesBibs()
+        );
+
+        response.setIs_active(
+                venue.getIs_active()
+        );
+
+        return response;
+
+    }
+    public VenueResponse getVenueById(
+            Integer id){
+
+        Venue venue=
+                venueRepository
+                        .findById(id)
+                        .orElseThrow(
+                                ()->new RuntimeException(
+                                        "Local no encontrado"
+                                )
+                        );
+
+        return convertToResponse(
+                venue
+        );
+
+    }
+
+    public List<VenueWithCourtsResponse>
+    getVenuesAndCourtsByOwner(
+            Integer ownerId){
+
+        List<Venue> venues=
+                venueRepository
+                        .findByOwnerAccountId(
+                                ownerId
+                        );
+
+        return venues.stream()
+                .map(venue ->{
+
+                    VenueWithCourtsResponse response=
+                            new VenueWithCourtsResponse();
+
+                    response.setIdVenue(
+                            venue.getIdVenue()
+                    );
+
+                    response.setName(
+                            venue.getName()
+                    );
+
+                    response.setSportCourts(
+                            new ArrayList<>()
+                    );
+
+                    return response;
+
+                })
+                .collect(
+                        Collectors.toList()
+                );
+
+    }
+
+
+    public VenueResponse updateVenue(
+
+            Integer id,
+
+            VenueRequest request){
+
+        Venue venue=
+                venueRepository
+                        .findById(id)
+                        .orElseThrow(
+                                ()->new RuntimeException(
+                                        "Local no encontrado"
+                                )
+                        );
+
+        mapRequestToEntity(
+                request,
+                venue
+        );
+
+        return convertToResponse(
+                venueRepository.save(
+                        venue
+                )
+        );
+
+    }
+
+    public void deleteVenue(
+            Integer id){
+
+        Venue venue=
+                venueRepository
+                        .findById(id)
+                        .orElseThrow(
+                                ()->new RuntimeException(
+                                        "Local no encontrado"
+                                )
+                        );
+
+        venue.setIs_active(
+                false
+        );
+
+        venueRepository.save(
+                venue
+        );
+
+    }
+
+}
