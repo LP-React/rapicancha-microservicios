@@ -33,7 +33,9 @@ public class GatewayConfig {
     @Bean
     RouterFunction<ServerResponse> sportCourtRoute() {
         return route("sport-court-route")
-                .route(path("/api/courts/**"), http())
+                .route(path("/api/sport-courts/**"), http())
+                .route(path("/api/venues-and-sport-court"), http())
+
                 .before(uri("http://localhost:8083"))
                 .build();
     }

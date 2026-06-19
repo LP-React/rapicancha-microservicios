@@ -61,6 +61,22 @@ public class SportCourtService {
         SportCourt saved =
                 sportCourtRepository
                         .save(court);
+        if (request.getImageUrls() != null) {
+
+            for (String url : request.getImageUrls()) {
+
+                SportCourtImage image =
+                        new SportCourtImage();
+
+                image.setSportCourtId(
+                        saved.getIdSportCourt()
+                );
+
+                image.setImageUrl(url);
+
+                imageRepository.save(image);
+            }
+        }
 
         return convertToResponse(
                 saved
@@ -224,7 +240,33 @@ public class SportCourtService {
         response.setIsActive(
                 court.getIsActive()
         );
+        List<SportCourtImageResponse> imageResponses =
+                imageRepository
+                        .findBySportCourtId(
+                                court.getIdSportCourt()
+                        )
+                        .stream()
+                        .map(img -> {
 
+                            SportCourtImageResponse dto =
+                                    new SportCourtImageResponse();
+
+                            dto.setIdSportCourtImage(
+                                    img.getIdSportCourtImage()
+                            );
+
+                            dto.setImageUrl(
+                                    img.getImageUrl()
+                            );
+
+                            return dto;
+
+                        })
+                        .toList();
+
+        response.setImages(
+                imageResponses
+        );
         return response;
 
     }

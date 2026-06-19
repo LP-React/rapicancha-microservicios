@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public interface AuthClient {
 
     @GetMapping(
-            "/api/profile/owner/{id}"
+            "/api/owner/{id}"
     )
     OwnerResponse getOwner(
             @PathVariable

@@ -44,8 +44,12 @@ public class OwnerService {
     }
 
     public OwnerProfile findOwnerOrThrow(Integer accountId) {
-        return ownerRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Dueño no encontrado con id: " + accountId));
+
+        return ownerRepository.findByAccountId(accountId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Dueño no encontrado con accountId: "
+                                        + accountId));
     }
 
     public ProfileInfo getProfileInfo(Integer accountId) {
@@ -55,4 +59,6 @@ public class OwnerService {
     }
 
     public record ProfileInfo(String firstName, String lastName, Integer profileId) {}
+
+
 }

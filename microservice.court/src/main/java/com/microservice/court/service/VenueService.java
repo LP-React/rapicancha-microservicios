@@ -21,6 +21,9 @@ public class VenueService {
     @Autowired
     private VenueRepository venueRepository;
 
+    @Autowired
+    private SportCourtRepository sportCourtRepository;
+
 
     public List<VenueResponse>
     getAllVenues(){
@@ -322,19 +325,15 @@ public class VenueService {
     }
 
     public List<VenueWithCourtsResponse>
-    getVenuesAndCourtsByOwner(
-            Integer ownerId){
+    getVenuesAndCourtsByOwner(Integer ownerId){
 
-        List<Venue> venues=
-                venueRepository
-                        .findByOwnerAccountId(
-                                ownerId
-                        );
+        List<Venue> venues =
+                venueRepository.findByOwnerAccountId(ownerId);
 
         return venues.stream()
-                .map(venue ->{
+                .map(venue -> {
 
-                    VenueWithCourtsResponse response=
+                    VenueWithCourtsResponse response =
                             new VenueWithCourtsResponse();
 
                     response.setIdVenue(
@@ -345,16 +344,38 @@ public class VenueService {
                             venue.getName()
                     );
 
+                    List<SportCourtSimpleResponse> courts =
+                            sportCourtRepository
+                                    .findByVenueIdAndIsActiveTrue(
+                                            venue.getIdVenue()
+                                    )
+                                    .stream()
+                                    .map(court -> {
+
+                                        SportCourtSimpleResponse dto =
+                                                new SportCourtSimpleResponse();
+
+                                        dto.setIdSportCourt(
+                                                court.getIdSportCourt()
+                                        );
+
+                                        dto.setName(
+                                                court.getName()
+                                        );
+
+                                        return dto;
+
+                                    })
+                                    .collect(Collectors.toList());
+
                     response.setSportCourts(
-                            new ArrayList<>()
+                            courts
                     );
 
                     return response;
 
                 })
-                .collect(
-                        Collectors.toList()
-                );
+                .collect(Collectors.toList());
 
     }
 

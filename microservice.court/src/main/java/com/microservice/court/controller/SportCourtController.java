@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courts")
+@RequestMapping("/api/sport-courts")
 public class SportCourtController {
 
     @Autowired
@@ -21,18 +21,15 @@ public class SportCourtController {
 
 
     @GetMapping
-    public List<SportCourtResponse>
-    getAll(
-
-            @RequestParam(
-                    required=false
-            )
+    public List<SportCourtResponse> getAll(
+            @RequestParam(name = "idVenue", required = false)
             Integer venueId){
+
+        System.out.println("VENUE ID = " + venueId);
 
         return service.getAllSportCourts(
                 venueId
         );
-
     }
 
 
