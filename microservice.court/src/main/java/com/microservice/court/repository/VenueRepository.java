@@ -17,4 +17,5 @@ JpaSpecificationExecutor<Venue>{
             Integer ownerId
     );
 
+    
 }

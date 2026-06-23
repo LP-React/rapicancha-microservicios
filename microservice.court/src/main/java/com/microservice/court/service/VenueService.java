@@ -26,10 +26,28 @@ public class VenueService {
 
 
     public List<VenueResponse>
-    getAllVenues(){
+    getAllVenues(
+            Integer ownerId){
 
-        return venueRepository
-                .findAll()
+        List<Venue> venues;
+
+        if(ownerId != null){
+
+            venues =
+                    venueRepository
+                            .findByOwnerAccountId(
+                                    ownerId
+                            );
+
+        }else{
+
+            venues =
+                    venueRepository
+                            .findAll();
+
+        }
+
+        return venues
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -302,7 +320,14 @@ public class VenueService {
         response.setIs_active(
                 venue.getIs_active()
         );
+        Long totalCourts =
+                sportCourtRepository.countByVenueIdAndIsActiveTrue(
+                        venue.getIdVenue()
+                );
 
+        response.setTotalCourts(
+                totalCourts.intValue()
+        );
         return response;
 
     }

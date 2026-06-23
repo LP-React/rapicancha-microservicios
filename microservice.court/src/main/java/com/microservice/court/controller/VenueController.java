@@ -18,13 +18,16 @@ public class VenueController {
 
 
     @GetMapping
-    public List<VenueResponse>
-    getAll(){
+    public List<VenueResponse> getAll(
 
-        return service.getAllVenues();
+            @RequestParam(required = false)
+            Integer ownerId){
+
+        return service.getAllVenues(
+                ownerId
+        );
 
     }
-
 
     @GetMapping("/{id}")
     public VenueResponse getById(

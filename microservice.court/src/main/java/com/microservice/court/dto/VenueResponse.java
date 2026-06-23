@@ -15,6 +15,7 @@ public class VenueResponse {
     private LocalTime openTime;
     private LocalTime closeTime;
     private Integer maxCapacity;
+    private Integer totalCourts;
     private String bannerImageUrl;
     private Integer ownerAccountId;
     private String ownerName;

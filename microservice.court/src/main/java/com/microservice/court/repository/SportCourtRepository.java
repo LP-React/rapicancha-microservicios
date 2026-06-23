@@ -18,4 +18,5 @@ extends JpaRepository<
     List<SportCourt>
     findByIsActiveTrue();
 
+    long countByVenueIdAndIsActiveTrue(Integer venueId);
 }
