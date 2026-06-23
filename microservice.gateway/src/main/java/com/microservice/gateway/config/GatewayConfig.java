@@ -18,6 +18,9 @@ public class GatewayConfig {
 
         return route("auth-route")
                 .route(path("/api/auth/**"), http())
+                .route(path("/api/customer/**"), http())
+                .route(path("/api/owner/**"), http())
+                .route(path("/api/account/**"), http())
                 .before(uri("http://localhost:8081"))
                 .build();
     }
