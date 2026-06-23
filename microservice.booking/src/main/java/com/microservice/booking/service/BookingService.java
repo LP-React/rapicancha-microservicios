@@ -1,5 +1,7 @@
 package com.microservice.booking.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 import com.microservice.booking.client.AuthClient;
 import com.microservice.booking.client.CourtClient;
 
@@ -36,9 +38,12 @@ public class BookingService {
     @Autowired
     private BookingProducer bookingProducer;
     @Transactional
+    @CircuitBreaker(
+            name = "bookingService",
+            fallbackMethod = "createBookingFallback"
+    )
     public BookingResponse createBooking(
             BookingRequest request) {
-
         CourtResponse court =
                 courtClient.getCourt(
                         request.getSportCourtId()
@@ -126,7 +131,22 @@ public class BookingService {
         );
     }
 
-        private BookingResponse convertToResponse(
+
+    public BookingResponse createBookingFallback(
+            BookingRequest request,
+            Exception ex) {
+
+        System.out.println(
+                "Circuit Breaker activado: "
+                        + ex.getMessage()
+        );
+
+        throw new RuntimeException(
+                "Servicio temporalmente no disponible"
+        );
+    }
+
+    private BookingResponse convertToResponse(
 
                 Booking booking,
 
