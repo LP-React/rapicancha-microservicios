@@ -3,11 +3,8 @@ package com.microservice.court.controller;
 import com.microservice.court.dto.VenueRequest;
 import com.microservice.court.dto.VenueResponse;
 import com.microservice.court.dto.VenueWithCourtsResponse;
-
 import com.microservice.court.service.VenueService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +29,7 @@ public class VenueController {
     @GetMapping("/{id}")
     public VenueResponse getById(
 
-            @PathVariable
+            @PathVariable("id")
             Integer id){
 
         return service.getVenueById(

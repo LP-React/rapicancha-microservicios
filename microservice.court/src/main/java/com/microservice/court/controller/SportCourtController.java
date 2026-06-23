@@ -37,7 +37,7 @@ public class SportCourtController {
     public SportCourtDetailResponse
     getDetail(
 
-            @PathVariable
+            @PathVariable("id")
             Integer id){
 
         return service.getCourtDetail(

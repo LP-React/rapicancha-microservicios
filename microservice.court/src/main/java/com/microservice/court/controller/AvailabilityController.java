@@ -32,7 +32,7 @@ public class AvailabilityController {
     public AvailabilityResponse
     getById(
 
-            @PathVariable
+            @PathVariable("id")
             Integer id){
 
         return service.getById(

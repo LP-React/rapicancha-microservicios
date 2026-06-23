@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 @FeignClient(
-name="mcsv-auth"
+        name="mcsv-auth",
+        fallback = AuthClientFallback.class
 )
 public interface AuthClient {
 
@@ -14,7 +15,7 @@ public interface AuthClient {
 "/api/customer/{id}"
 )
 CustomerResponse getCustomer(
-@PathVariable Integer id
+@PathVariable("id") Integer id
 );
 
 }

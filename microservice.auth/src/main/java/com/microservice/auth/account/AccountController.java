@@ -14,7 +14,7 @@ public class AccountController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAccount(@PathVariable Integer id) {
+    public void deleteAccount(@PathVariable("id") Integer id) {
         accountService.deleteAccount(id);
     }
 }

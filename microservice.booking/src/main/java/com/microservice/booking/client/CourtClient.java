@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 @FeignClient(
-name="mcsv-court"
+        name="mcsv-court",
+        fallback = CourtClientFallback.class
 )
 public interface CourtClient {
 
@@ -13,7 +14,7 @@ public interface CourtClient {
 "/api/sport-courts/{id}"
 )
 CourtResponse getCourt(
-@PathVariable Integer id
+@PathVariable("id") Integer id
 );
 
 }
