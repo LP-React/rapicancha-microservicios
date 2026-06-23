@@ -20,6 +20,9 @@ public class SportCourtService {
     @Autowired
     private SportCourtImageRepository imageRepository;
 
+    @Autowired
+    private VenueRepository venueRepository;
+
     public List<SportCourtResponse> getAllSportCourts(Integer venueId) {
 
         List<SportCourt> courts;
@@ -192,6 +195,11 @@ public class SportCourtService {
         response.setVenueId(
                 court.getVenueId()
         );
+
+        if (court.getVenueId() != null) {
+            venueRepository.findById(court.getVenueId())
+                    .ifPresent(venue -> response.setVenueName(venue.getName()));
+        }
 
         response.setName(
                 court.getName()
