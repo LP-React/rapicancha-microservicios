@@ -37,16 +37,17 @@ public class CustomerService {
         customer.setFirstName(request.firstName());
         customer.setLastName(request.lastName());
         customer.setPhone(request.phone());
-        return getCustomer(customerRepository.save(customer).getId());
+        customerRepository.save(customer);
+        return getCustomer(accountId);
     }
 
     public CustomerProfile findCustomerOrThrow(Integer accountId) {
-        return customerRepository.findById(accountId)
+        return customerRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con id: " + accountId));
     }
 
     public ProfileInfo getProfileInfo(Integer accountId) {
-        return customerRepository.findById(accountId)
+        return customerRepository.findByAccountId(accountId)
                 .map(c -> new ProfileInfo(c.getFirstName(), c.getLastName(), c.getId()))
                 .orElse(new ProfileInfo(null, null, null));
     }

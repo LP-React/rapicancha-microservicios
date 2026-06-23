@@ -40,7 +40,8 @@ public class OwnerService {
         owner.setLastName(request.lastName());
         owner.setNationalId(request.nationalId());
         owner.setPhone(request.phone());
-        return getOwner(ownerRepository.save(owner).getId());
+        ownerRepository.save(owner);
+        return getOwner(accountId);
     }
 
     public OwnerProfile findOwnerOrThrow(Integer accountId) {
@@ -53,7 +54,7 @@ public class OwnerService {
     }
 
     public ProfileInfo getProfileInfo(Integer accountId) {
-        return ownerRepository.findById(accountId)
+        return ownerRepository.findByAccountId(accountId)
                 .map(o -> new ProfileInfo(o.getFirstName(), o.getLastName(), o.getId()))
                 .orElse(new ProfileInfo(null, null, null));
     }
