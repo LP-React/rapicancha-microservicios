@@ -10,6 +10,7 @@ import com.microservice.booking.dto.*;
 
 import com.microservice.booking.entity.*;
 
+import com.microservice.booking.rabbit.BookingProducer;
 import com.microservice.booking.repository.*;
 
 import jakarta.transaction.Transactional;
@@ -32,7 +33,8 @@ public class BookingService {
 
     @Autowired
     private AuthClient authClient;
-
+    @Autowired
+    private BookingProducer bookingProducer;
     @Transactional
     public BookingResponse createBooking(
             BookingRequest request) {
@@ -105,6 +107,17 @@ public class BookingService {
                 bookingRepository.save(
                         booking
                 );
+
+        bookingProducer.sendBookingCreated(
+                "Reserva creada ID="
+                        + saved.getIdBooking()
+                        + ", Cliente="
+                        + customer.getFirstName()
+                        + " "
+                        + customer.getLastName()
+                        + ", Cancha="
+                        + court.getName()
+        );
 
         return convertToResponse(
                 saved,

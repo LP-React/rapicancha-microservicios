@@ -11,7 +11,7 @@ name="mcsv-auth"
 public interface AuthClient {
 
 @GetMapping(
-"/api/profile/customer/{id}"
+"/api/customer/{id}"
 )
 CustomerResponse getCustomer(
 @PathVariable Integer id

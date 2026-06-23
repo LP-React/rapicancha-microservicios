@@ -10,7 +10,7 @@ name="mcsv-court"
 public interface CourtClient {
 
 @GetMapping(
-"/api/courts/{id}"
+"/api/sport-courts/{id}"
 )
 CourtResponse getCourt(
 @PathVariable Integer id
