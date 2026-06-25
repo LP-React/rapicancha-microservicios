@@ -14,13 +14,10 @@ import java.time.*;
 public class Booking {
 
     @Id
-    @GeneratedValue(strategy=
-            GenerationType.IDENTITY)
-
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idBooking;
 
     private Integer sportCourtId;
-
     private Integer customerAccountId;
 
     @Column(nullable=false)
@@ -32,32 +29,18 @@ public class Booking {
     @Column(name="end_time")
     private LocalTime endTime;
 
-    @Column(
-            nullable=false,
-            precision=8,
-            scale=2
-    )
+    @Column(nullable=false, precision=8, scale=2)
     private BigDecimal price;
 
-    @Column(
-            name="qr_code",
-            unique=true
-    )
+    @Column(name="qr_code", unique=true)
     private String qrCode;
 
     private LocalDateTime checkedInAt;
 
-    @Enumerated(
-            EnumType.STRING
-    )
-    private BookingStatus status=
-            BookingStatus.PENDING;
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status= BookingStatus.PENDING;
 
-    @Column(
-            name="created_at",
-            updatable=false
-    )
-    private LocalDateTime createdAt=
-            LocalDateTime.now();
+    @Column(name="created_at", updatable=false)
+    private LocalDateTime createdAt= LocalDateTime.now();
 
 }

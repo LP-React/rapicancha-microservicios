@@ -8,14 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BookingConsumer {
 
-    @RabbitListener(
-            queues = RabbitConfig.BOOKING_QUEUE
-    )
-    public void receiveMessage(
-            String message) {
-
-        System.out.println(
-                "RABBITMQ -> " + message
-        );
+    @RabbitListener(queues = RabbitConfig.BOOKING_QUEUE)
+    public void receiveMessage(String message) {
+        System.out.println("RABBITMQ -> " + message);
     }
 }

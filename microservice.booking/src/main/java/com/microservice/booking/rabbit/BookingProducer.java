@@ -12,12 +12,7 @@ public class BookingProducer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sendBookingCreated(
-            String message) {
-
-        rabbitTemplate.convertAndSend(
-                RabbitConfig.BOOKING_QUEUE,
-                message
-        );
+    public void sendBookingCreated(String message) {
+        rabbitTemplate.convertAndSend(RabbitConfig.BOOKING_QUEUE, message);
     }
 }
