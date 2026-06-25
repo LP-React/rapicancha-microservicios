@@ -5,183 +5,82 @@ import com.microservice.court.dto.AvailabilityResponse;
 import com.microservice.court.entity.SportCourtAvailability;
 import com.microservice.court.repository.AvailabilityRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AvailabilityService {
 
-    @Autowired
-    private AvailabilityRepository availabilityRepository;
+    private final AvailabilityRepository availabilityRepository;
 
     public List<AvailabilityResponse> getAllActive(){
-
-        return availabilityRepository
-                .findByIsActiveTrue()
+        return availabilityRepository.findByIsActiveTrue()
                 .stream()
                 .map(this::convertToResponse)
-                .collect(Collectors.toList());
-
+                .toList();
     }
 
-    public List<AvailabilityResponse> getByCourt(
-            Integer courtId){
-
-        return availabilityRepository
-                .findBySportCourtIdAndIsActiveTrue(
-                        courtId
-                )
+    public List<AvailabilityResponse> getByCourt(Integer courtId){
+        return availabilityRepository.findBySportCourtIdAndIsActiveTrue(courtId)
                 .stream()
                 .map(this::convertToResponse)
-                .collect(Collectors.toList());
-
+                .toList();
     }
 
-    public AvailabilityResponse getById(
-            Integer id){
+    public AvailabilityResponse getById(Integer id){
+        SportCourtAvailability availability= availabilityRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Disponibilidad no encontrada"));
 
-        SportCourtAvailability availability=
-                availabilityRepository
-                        .findById(id)
-                        .orElseThrow(
-                                ()->new RuntimeException(
-                                        "Disponibilidad no encontrada"
-                                )
-                        );
-
-        return convertToResponse(
-                availability
-        );
-
+        return convertToResponse(availability);
     }
 
-    public AvailabilityResponse create(
-            AvailabilityRequest request){
+    public AvailabilityResponse create(AvailabilityRequest request){
+        SportCourtAvailability availability= new SportCourtAvailability();
+        availability.setSportCourtId(request.getSportCourtId());
 
-        SportCourtAvailability availability=
-                new SportCourtAvailability();
+        mapRequestToEntity(request, availability);
 
-        availability.setSportCourtId(
-                request.getSportCourtId()
-        );
-
-        mapRequestToEntity(
-                request,
-                availability
-        );
-
-        return convertToResponse(
-                availabilityRepository.save(
-                        availability
-                )
-        );
-
+        return convertToResponse(availabilityRepository.save(availability));
     }
 
-    public AvailabilityResponse update(
-            Integer id,
-            AvailabilityRequest request){
+    public AvailabilityResponse update(Integer id, AvailabilityRequest request){
 
-        SportCourtAvailability availability=
-                availabilityRepository
-                        .findById(id)
-                        .orElseThrow(
-                                ()->new RuntimeException(
-                                        "Disponibilidad no encontrada"
-                                )
-                        );
+        SportCourtAvailability availability= availabilityRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Disponibilidad no encontrada"));
 
-        mapRequestToEntity(
-                request,
-                availability
-        );
+        mapRequestToEntity(request, availability);
 
-        return convertToResponse(
-                availabilityRepository.save(
-                        availability
-                )
-        );
-
+        return convertToResponse(availabilityRepository.save(availability));
     }
 
-    public void delete(
-            Integer id){
-
-        SportCourtAvailability availability=
-                availabilityRepository
-                        .findById(id)
-                        .orElseThrow(
-                                ()->new RuntimeException(
-                                        "Disponibilidad no encontrada"
-                                )
-                        );
+    public void delete(Integer id){
+        SportCourtAvailability availability= availabilityRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Disponibilidad no encontrada"));
 
         availability.setIsActive(false);
 
-        availabilityRepository.save(
-                availability
-        );
-
+        availabilityRepository.save(availability);
     }
 
-
-    private void mapRequestToEntity(
-
-            AvailabilityRequest request,
-
-            SportCourtAvailability entity){
-
-        entity.setWeekday(
-                request.getWeekday()
-        );
-
-        entity.setStartTime(
-                request.getStartTime()
-        );
-
-        entity.setEndTime(
-                request.getEndTime()
-        );
-
+    private void mapRequestToEntity(AvailabilityRequest request, SportCourtAvailability entity){
+        entity.setWeekday(request.getWeekday());
+        entity.setStartTime(request.getStartTime());
+        entity.setEndTime(request.getEndTime());
     }
 
+    private AvailabilityResponse convertToResponse(SportCourtAvailability entity){
+        AvailabilityResponse response= new AvailabilityResponse();
 
-    private AvailabilityResponse
-    convertToResponse(
-            SportCourtAvailability entity){
-
-        AvailabilityResponse response=
-                new AvailabilityResponse();
-
-        response.setIdAvailability(
-                entity.getIdAvailability()
-        );
-
-        response.setSportCourtId(
-                entity.getSportCourtId()
-        );
-
-        response.setWeekday(
-                entity.getWeekday()
-        );
-
-        response.setStartTime(
-                entity.getStartTime()
-        );
-
-        response.setEndTime(
-                entity.getEndTime()
-        );
-
-        response.setIsActive(
-                entity.getIsActive()
-        );
+        response.setIdAvailability(entity.getIdAvailability());
+        response.setSportCourtId(entity.getSportCourtId());
+        response.setWeekday(entity.getWeekday());
+        response.setStartTime(entity.getStartTime());
+        response.setEndTime(entity.getEndTime());
+        response.setIsActive(entity.getIsActive());
 
         return response;
-
     }
-
 }

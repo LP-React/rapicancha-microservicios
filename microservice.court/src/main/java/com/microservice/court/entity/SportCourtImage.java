@@ -11,17 +11,12 @@ import lombok.Setter;
 public class SportCourtImage {
 
     @Id
-    @GeneratedValue(strategy=
-            GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer idSportCourtImage;
 
     private Integer sportCourtId;
 
-    @Column(
-            name="image_url",
-            length=500,
-            nullable=false
-    )
+    @Column(name="image_url", length=500, nullable=false)
     private String imageUrl;
 
 }
