@@ -10,15 +10,10 @@ import java.time.LocalTime;
 public class BookingRequest {
 
     private Integer sportCourtId;
-
     private Integer customerAccountId;
-
     private LocalDate date;
-
     private LocalTime startTime;
-
     private LocalTime endTime;
-
     private BigDecimal price;
 
 }

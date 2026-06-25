@@ -12,28 +12,21 @@ import com.microservice.booking.entity.BookingStatus;
 import com.microservice.booking.rabbit.BookingProducer;
 import com.microservice.booking.repository.BookingRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
-
-    @Autowired
-    private CourtClient courtClient;
-
-    @Autowired
-    private AuthClient authClient;
-
-    @Autowired
-    private BookingProducer bookingProducer;
+    private final BookingRepository bookingRepository;
+    private final CourtClient courtClient;
+    private final AuthClient authClient;
+    private final BookingProducer bookingProducer;
 
     @Transactional
     public BookingResponse createBooking(BookingRequest request) {
@@ -139,6 +132,7 @@ public class BookingService {
                     CourtResponse court = courtClient.getCourt(booking.getSportCourtId());
                     CustomerResponse customer = authClient.getCustomer(booking.getCustomerAccountId());
                     return convertToResponse(booking, court, customer);
-                }).collect(Collectors.toList());
+                })
+                .toList();
     }
 }

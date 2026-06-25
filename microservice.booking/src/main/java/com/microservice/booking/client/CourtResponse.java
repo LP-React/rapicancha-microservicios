@@ -8,11 +8,8 @@ import java.math.BigDecimal;
 public class CourtResponse {
 
     private Integer idSportCourt;
-
     private String name;
-
     private String sportType;
-
     private BigDecimal rate;
 
 }

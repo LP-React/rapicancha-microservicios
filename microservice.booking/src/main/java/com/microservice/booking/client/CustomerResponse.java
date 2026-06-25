@@ -6,11 +6,8 @@ import lombok.Data;
 public class CustomerResponse {
 
     private Integer accountId;
-
     private String firstName;
-
     private String lastName;
-
     private String phone;
 
 }

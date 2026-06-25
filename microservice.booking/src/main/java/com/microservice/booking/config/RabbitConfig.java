@@ -11,7 +11,6 @@ public class RabbitConfig {
 
     @Bean
     public Queue bookingQueue() {
-        return new Queue(BOOKING_QUEUE,true
-        );
+        return new Queue(BOOKING_QUEUE,true);
     }
 }
