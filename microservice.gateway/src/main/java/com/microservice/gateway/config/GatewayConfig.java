@@ -14,49 +14,57 @@ import static org.springframework.web.servlet.function.RequestPredicates.path;
 public class GatewayConfig {
 
     @Bean
-    RouterFunction<ServerResponse> authRoute() {
-
-        return route("auth-route")
+    RouterFunction<ServerResponse> authPublicRoute() {
+        return route("auth-public-route")
                 .route(path("/api/auth/**"), http())
-                .route(path("/api/customer/**"), http())
-                .route(path("/api/owner/**"), http())
-                .route(path("/api/account/**"), http())
                 .before(uri("http://localhost:8081"))
                 .build();
     }
 
     @Bean
-    RouterFunction<ServerResponse> venueRoute() {
+    RouterFunction<ServerResponse> authProtectedRoute(JwtAuthenticationFilter jwtFilter) {
+        return route("auth-protected-route")
+                .route(path("/api/customer/**"), http())
+                .route(path("/api/owner/**"), http())
+                .route(path("/api/account/**"), http())
+                .filter(jwtFilter)
+                .before(uri("http://localhost:8081"))
+                .build();
+    }
+
+    @Bean
+    RouterFunction<ServerResponse> venueRoute(JwtAuthenticationFilter jwtFilter) {
         return route("venue-route")
                 .route(path("/api/venues/**"), http())
+                .filter(jwtFilter)
                 .before(uri("http://localhost:8083"))
                 .build();
     }
 
     @Bean
-    RouterFunction<ServerResponse> sportCourtRoute() {
+    RouterFunction<ServerResponse> sportCourtRoute(JwtAuthenticationFilter jwtFilter) {
         return route("sport-court-route")
                 .route(path("/api/sport-courts/**"), http())
                 .route(path("/api/venues-and-sport-court"), http())
-
+                .filter(jwtFilter)
                 .before(uri("http://localhost:8083"))
                 .build();
     }
 
-
-
     @Bean
-    RouterFunction<ServerResponse> bookingRoute() {
+    RouterFunction<ServerResponse> bookingRoute(JwtAuthenticationFilter jwtFilter) {
         return route("booking-route")
                 .route(path("/api/bookings/**"), http())
+                .filter(jwtFilter)
                 .before(uri("http://localhost:8082"))
                 .build();
     }
 
     @Bean
-    RouterFunction<ServerResponse> availabilityRoute() {
+    RouterFunction<ServerResponse> availabilityRoute(JwtAuthenticationFilter jwtFilter) {
         return route("availability-route")
                 .route(path("/api/availability/**"), http())
+                .filter(jwtFilter)
                 .before(uri("http://localhost:8083"))
                 .build();
     }

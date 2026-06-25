@@ -2,7 +2,6 @@ package com.microservice.auth.account;
 
 import java.util.Optional;
 
-import com.microservice.auth.account.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

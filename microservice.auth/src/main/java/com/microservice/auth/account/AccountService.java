@@ -1,7 +1,5 @@
 package com.microservice.auth.account;
 
-import com.microservice.auth.account.Account;
-import com.microservice.auth.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
