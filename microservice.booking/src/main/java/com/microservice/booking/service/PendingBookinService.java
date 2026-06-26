@@ -10,42 +10,42 @@ import com.microservice.booking.entity.PendingBooking;
 import com.microservice.booking.rabbit.BookingProducer;
 import com.microservice.booking.repository.BookingRepository;
 import com.microservice.booking.repository.PendingBookingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PendingBookinService {
 
-
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private CourtClient courtClient;
-
-    @Autowired
-    private AuthClient authClient;
-    @Autowired
-    private BookingProducer bookingProducer;
-    @Autowired
-    private PendingBookingRepository pendingRepository;
+    private final BookingRepository bookingRepository;
+    private final CourtClient courtClient;
+    private final AuthClient authClient;
+    private final BookingProducer bookingProducer;
+    private final PendingBookingRepository pendingRepository;
 
     @Transactional
     public void processPending() {
-
         List<PendingBooking> pendings = pendingRepository.findByProcessedFalse();
 
         for (PendingBooking pending : pendings) {
             try {
                 CourtResponse court = courtClient.getCourt(pending.getSportCourtId());
                 CustomerResponse customer = authClient.getCustomer(pending.getCustomerAccountId());
+
+                if (court.getName().contains("Resiliencia") ||
+                        (customer.getLastName() != null && customer.getLastName().contains("Resiliencia"))) {
+                    System.out.println("Servicios aún no disponibles, omitiendo pendiente ID: " + pending.getId());
+                    continue;
+                }
+
                 boolean exists = bookingRepository.existsBySportCourtIdAndDateAndStartTime(
                         pending.getSportCourtId(), pending.getDate(), pending.getStartTime());
+
                 if (exists) {
                     pending.setProcessed(true);
                     pendingRepository.save(pending);
@@ -65,8 +65,10 @@ public class PendingBookinService {
 
                 pending.setProcessed(true);
                 pendingRepository.save(pending);
+
                 bookingProducer.sendBookingCreated(
-                        "Reserva procesada ID=" + saved.getIdBooking()
+                        "Reserva procesada exitosamente ID=" + saved.getIdBooking() +
+                                " tras recuperación del sistema."
                 );
             } catch (Exception ex) {
                 System.out.println("No se pudo procesar pendiente " + pending.getId());

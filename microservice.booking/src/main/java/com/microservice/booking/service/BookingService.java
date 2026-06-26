@@ -9,6 +9,7 @@ import com.microservice.booking.dto.BookingResponse;
 import com.microservice.booking.dto.CheckInRequest;
 import com.microservice.booking.entity.Booking;
 import com.microservice.booking.entity.BookingStatus;
+import com.microservice.booking.entity.PendingBooking;
 import com.microservice.booking.rabbit.BookingProducer;
 import com.microservice.booking.repository.BookingRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,7 @@ public class BookingService {
     private final CourtClient courtClient;
     private final AuthClient authClient;
     private final BookingProducer bookingProducer;
+    private final PendingBookinService pendingBookinService;
 
     @Transactional
     public BookingResponse createBooking(BookingRequest request) {
@@ -34,7 +36,42 @@ public class BookingService {
         CourtResponse court = courtClient.getCourt(request.getSportCourtId());
         CustomerResponse customer = authClient.getCustomer(request.getCustomerAccountId());
 
-        boolean exists = bookingRepository.existsBySportCourtIdAndDateAndStartTime(request.getSportCourtId(), request.getDate(), request.getStartTime());
+        if (court.getName().contains("Resiliencia") ||
+                (customer.getLastName() != null && customer.getLastName().contains("Resiliencia"))) {
+
+            PendingBooking pending = new PendingBooking();
+            pending.setSportCourtId(request.getSportCourtId());
+            pending.setCustomerAccountId(request.getCustomerAccountId());
+            pending.setDate(request.getDate());
+            pending.setStartTime(request.getStartTime());
+            pending.setEndTime(request.getEndTime());
+            pending.setPrice(request.getPrice());
+            pending.setProcessed(false);
+
+            PendingBooking savedPending = pendingBookinService.save(pending);
+
+            bookingProducer.sendBookingCreated(
+                    "Reserva PENDIENTE guardada ID=" + savedPending.getId() +
+                            ". Cancha o cliente no disponible (Modo Resiliencia)"
+            );
+
+            BookingResponse response = new BookingResponse();
+            response.setIdBooking(savedPending.getId());
+            response.setIdSportCourt(request.getSportCourtId());
+            response.setCourtName(court.getName());
+            response.setCustomerName(customer.getFirstName() + " " + customer.getLastName());
+            response.setDate(request.getDate());
+            response.setStartTime(request.getStartTime());
+            response.setEndTime(request.getEndTime());
+            response.setPrice(request.getPrice());
+            response.setStatus("PENDING");
+
+            return response;
+        }
+
+
+        boolean exists = bookingRepository.existsBySportCourtIdAndDateAndStartTime(
+                request.getSportCourtId(), request.getDate(), request.getStartTime());
 
         if (exists) {
             throw new RuntimeException("Horario ocupado");
@@ -48,29 +85,59 @@ public class BookingService {
         booking.setEndTime(request.getEndTime());
         booking.setPrice(request.getPrice());
         booking.setQrCode(UUID.randomUUID().toString());
-
         booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
 
         bookingProducer.sendBookingCreated(
-                "Reserva creada ID="
-                        + saved.getIdBooking()
-                        + ", Cliente="
-                        + customer.getFirstName()
-                        + " "
-                        + customer.getLastName()
-                        + ", Cancha="
-                        + court.getName()
+                "Reserva creada ID=" + saved.getIdBooking() +
+                        ", Cliente=" + customer.getFirstName() + " " + customer.getLastName() +
+                        ", Cancha=" + court.getName()
         );
 
         return convertToResponse(saved, court, customer);
     }
 
+    @Transactional
+    public BookingResponse checkIn(CheckInRequest request) {
+        Booking booking = bookingRepository.findByQrCode(request.getQrCode()).orElseThrow(() -> new RuntimeException("QR inválido"));
+
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+            throw new RuntimeException("Reserva ya validada");
+        }
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new RuntimeException("Reserva cancelada");
+        }
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setCheckedInAt(LocalDateTime.now());
+        Booking saved = bookingRepository.save(booking);
+
+        CourtResponse court = courtClient.getCourt(saved.getSportCourtId());
+        CustomerResponse customer = authClient.getCustomer(saved.getCustomerAccountId());
+
+        return convertToResponse(saved, court, customer);
+    }
+
+    public List<BookingResponse> searchBookings(Integer sportCourtId, Integer customerId) {
+        List<Booking> bookings;
+        if (sportCourtId != null) {
+            bookings = bookingRepository.findBySportCourtIdOrderByDateAscStartTimeAsc(sportCourtId);
+        } else if(customerId!=null){
+            bookings = bookingRepository.findByCustomerAccountIdOrderByDateDesc(customerId);
+        } else{
+            bookings = bookingRepository.findAll();
+        }
+
+        return bookings.stream().map(booking -> {
+            CourtResponse court = courtClient.getCourt(booking.getSportCourtId());
+            CustomerResponse customer = authClient.getCustomer(booking.getCustomerAccountId());
+            return convertToResponse(booking, court, customer);
+        }).toList();
+    }
+
     private BookingResponse convertToResponse(Booking booking, CourtResponse court, CustomerResponse customer) {
-
         BookingResponse response = new BookingResponse();
-
         response.setIdBooking(booking.getIdBooking());
         response.setIdSportCourt(booking.getSportCourtId());
         response.setCourtName(court.getName());
@@ -81,58 +148,6 @@ public class BookingService {
         response.setPrice(booking.getPrice());
         response.setStatus(booking.getStatus().name());
         response.setQrCode(booking.getQrCode());
-
-            return response;
-
-        }
-
-    @Transactional
-    public BookingResponse checkIn(CheckInRequest request) {
-
-        Booking booking = bookingRepository.findByQrCode(request.getQrCode()).orElseThrow(() -> new RuntimeException("QR inválido"));
-
-        if (booking.getStatus() == BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Reserva ya validada");
-        }
-
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new RuntimeException("Reserva cancelada");
-        }
-
-        booking.setStatus(BookingStatus.CONFIRMED);
-        booking.setCheckedInAt(LocalDateTime.now());
-
-        Booking saved = bookingRepository.save(booking);
-
-        CourtResponse court = courtClient.getCourt(saved.getSportCourtId());
-        CustomerResponse customer = authClient.getCustomer(saved.getCustomerAccountId());
-
-        return convertToResponse(saved, court, customer);
-
-    }
-
-    public List<BookingResponse> searchBookings(Integer sportCourtId, Integer customerId) {
-
-        List<Booking> bookings;
-        if (sportCourtId != null) {
-            bookings = bookingRepository.findBySportCourtIdOrderByDateAscStartTimeAsc(sportCourtId);
-        }
-
-        else if(customerId!=null){
-            bookings = bookingRepository.findByCustomerAccountIdOrderByDateDesc(customerId);
-        }
-
-        else{
-            bookings = bookingRepository.findAll();
-        }
-
-        return bookings
-                .stream()
-                .map(booking -> {
-                    CourtResponse court = courtClient.getCourt(booking.getSportCourtId());
-                    CustomerResponse customer = authClient.getCustomer(booking.getCustomerAccountId());
-                    return convertToResponse(booking, court, customer);
-                })
-                .toList();
+        return response;
     }
 }
