@@ -14,7 +14,6 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 @Component
 public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResponse, ServerResponse> {
@@ -24,6 +23,10 @@ public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResp
 
     @Override
     public ServerResponse filter(ServerRequest request, HandlerFunction<ServerResponse> next) throws Exception {
+
+        if (request.path().startsWith("/fallback/")) {
+            return next.handle(request);
+        }
 
         System.out.println("================================");
         System.out.println("PATH: " + request.path());
@@ -46,18 +49,18 @@ public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResp
 
         System.out.println("TOKEN: " + token);
 
+        Claims claims;
         try {
-            Claims claims = Jwts.parser().verifyWith(buildKey()).build().parseSignedClaims(token).getPayload();
+            claims = Jwts.parser().verifyWith(buildKey()).build().parseSignedClaims(token).getPayload();
             System.out.println("JWT VÁLIDO");
             System.out.println("SUBJECT: " + claims.getSubject());
-
-            return next.handle(request);
-
         } catch (Exception e) {
             System.out.println("ERROR JWT");
             e.printStackTrace();
             return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        return next.handle(request);
     }
 
     private SecretKey buildKey() {

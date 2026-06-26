@@ -9,6 +9,10 @@ import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouter
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
+import static org.springframework.cloud.gateway.server.mvc.filter.CircuitBreakerFilterFunctions.circuitBreaker;
+import org.springframework.http.HttpStatus;
+import java.util.Map;
+import java.util.HashMap;
 
 @Configuration
 public class GatewayConfig {
@@ -47,6 +51,7 @@ public class GatewayConfig {
                 .route(path("/api/sport-courts/**"), http())
                 .route(path("/api/venues-and-sport-court"), http())
                 .filter(jwtFilter)
+                .filter(circuitBreaker("courtCB", "/fallback/court"))
                 .before(uri("http://localhost:8083"))
                 .build();
     }
@@ -56,6 +61,7 @@ public class GatewayConfig {
         return route("booking-route")
                 .route(path("/api/bookings/**"), http())
                 .filter(jwtFilter)
+                .filter(circuitBreaker("bookingCB", "/fallback/booking"))
                 .before(uri("http://localhost:8082"))
                 .build();
     }
@@ -66,6 +72,19 @@ public class GatewayConfig {
                 .route(path("/api/availability/**"), http())
                 .filter(jwtFilter)
                 .before(uri("http://localhost:8083"))
+                .build();
+    }
+
+    @Bean
+    RouterFunction<ServerResponse> fallbackRoute() {
+        return route("fallback-route")
+                .route(path("/fallback/**"), request -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("error", "Servicio no disponible");
+                    response.put("message", "El servicio no está disponible temporalmente, intente más tarde.");
+                    response.put("status", 503);
+                    return ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+                })
                 .build();
     }
 }
