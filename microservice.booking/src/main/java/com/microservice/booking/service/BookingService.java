@@ -35,97 +35,144 @@ public class BookingService {
     private AuthClient authClient;
     @Autowired
     private BookingProducer bookingProducer;
+    @Autowired
+    private PendingBookinService pendingBookingService;
+
     @Transactional
     public BookingResponse createBooking(
             BookingRequest request) {
 
-        CourtResponse court =
-                courtClient.getCourt(
-                        request.getSportCourtId()
+        try {
+
+            CourtResponse court =
+                    courtClient.getCourt(
+                            request.getSportCourtId()
+                    );
+
+            CustomerResponse customer =
+                    authClient.getCustomer(
+                            request.getCustomerAccountId()
+                    );
+
+            boolean exists =
+                    bookingRepository
+                            .existsBySportCourtIdAndDateAndStartTime(
+
+                                    request.getSportCourtId(),
+                                    request.getDate(),
+                                    request.getStartTime()
+
+                            );
+
+            if (exists) {
+
+                throw new RuntimeException(
+                        "Horario ocupado"
                 );
 
-        CustomerResponse customer =
-                authClient.getCustomer(
-                        request.getCustomerAccountId()
-                );
+            }
 
-        boolean exists =
-                bookingRepository
-                        .existsBySportCourtIdAndDateAndStartTime(
+            Booking booking =
+                    new Booking();
 
-                                request.getSportCourtId(),
-                                request.getDate(),
-                                request.getStartTime()
+            booking.setSportCourtId(
+                    request.getSportCourtId()
+            );
 
-                        );
+            booking.setCustomerAccountId(
+                    request.getCustomerAccountId()
+            );
 
-        if (exists) {
+            booking.setDate(
+                    request.getDate()
+            );
+
+            booking.setStartTime(
+                    request.getStartTime()
+            );
+
+            booking.setEndTime(
+                    request.getEndTime()
+            );
+
+            booking.setPrice(
+                    request.getPrice()
+            );
+
+            booking.setQrCode(
+                    UUID.randomUUID().toString()
+            );
+
+            booking.setStatus(
+                    BookingStatus.PENDING
+            );
+
+            Booking saved =
+                    bookingRepository.save(
+                            booking
+                    );
+
+            bookingProducer.sendBookingCreated(
+                    "Reserva creada ID="
+                            + saved.getIdBooking()
+                            + ", Cliente="
+                            + customer.getFirstName()
+                            + " "
+                            + customer.getLastName()
+                            + ", Cancha="
+                            + court.getName()
+            );
+
+            return convertToResponse(
+                    saved,
+                    court,
+                    customer
+            );
+
+        } catch (Exception ex) {
+
+            PendingBooking pending =
+                    new PendingBooking();
+
+            pending.setSportCourtId(
+                    request.getSportCourtId()
+            );
+
+            pending.setCustomerAccountId(
+                    request.getCustomerAccountId()
+            );
+
+            pending.setDate(
+                    request.getDate()
+            );
+
+            pending.setStartTime(
+                    request.getStartTime()
+            );
+
+            pending.setEndTime(
+                    request.getEndTime()
+            );
+
+            pending.setPrice(
+                    request.getPrice()
+            );
+
+            pendingBookingService.save(
+                    pending
+            );
+            bookingProducer.sendBookingCreated(
+                    "Reserva pendiente ID="
+                            + pending.getId()
+            );
 
             throw new RuntimeException(
-                    "Horario ocupado"
+                    "Auth no disponible. La reserva quedó pendiente."
             );
 
         }
 
-        Booking booking =
-                new Booking();
-
-        booking.setSportCourtId(
-                request.getSportCourtId()
-        );
-
-        booking.setCustomerAccountId(
-                request.getCustomerAccountId()
-        );
-
-        booking.setDate(
-                request.getDate()
-        );
-
-        booking.setStartTime(
-                request.getStartTime()
-        );
-
-        booking.setEndTime(
-                request.getEndTime()
-        );
-
-        booking.setPrice(
-                request.getPrice()
-        );
-
-        booking.setQrCode(
-                UUID.randomUUID()
-                        .toString()
-        );
-
-        booking.setStatus(
-                BookingStatus.PENDING
-        );
-
-        Booking saved =
-                bookingRepository.save(
-                        booking
-                );
-
-        bookingProducer.sendBookingCreated(
-                "Reserva creada ID="
-                        + saved.getIdBooking()
-                        + ", Cliente="
-                        + customer.getFirstName()
-                        + " "
-                        + customer.getLastName()
-                        + ", Cancha="
-                        + court.getName()
-        );
-
-        return convertToResponse(
-                saved,
-                court,
-                customer
-        );
     }
-
         private BookingResponse convertToResponse(
 
                 Booking booking,
@@ -312,4 +359,8 @@ public class BookingService {
                 );
 
     }
-    }
+
+
+
+        }
+

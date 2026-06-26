@@ -24,27 +24,46 @@ public class JwtAuthenticationFilter implements HandlerFilterFunction<ServerResp
 
     @Override
     public ServerResponse filter(ServerRequest request, HandlerFunction<ServerResponse> next) throws Exception {
+
+        System.out.println("================================");
+        System.out.println("PATH: " + request.path());
+
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        System.out.println("HEADER: " + authHeader);
+
+        if (authHeader == null) {
+            System.out.println("NO HAY AUTHORIZATION");
+            return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!authHeader.startsWith("Bearer ")) {
+            System.out.println("NO EMPIEZA CON BEARER");
             return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String token = authHeader.substring(7);
 
+        System.out.println("TOKEN: " + token);
+
         try {
+
             Claims claims = Jwts.parser()
                     .verifyWith(buildKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
 
-            if (claims.getExpiration().before(new Date())) {
-                return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
-            }
+            System.out.println("JWT VÁLIDO");
+            System.out.println("SUBJECT: " + claims.getSubject());
 
             return next.handle(request);
+
         } catch (Exception e) {
+
+            System.out.println("ERROR JWT");
+            e.printStackTrace();
+
             return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

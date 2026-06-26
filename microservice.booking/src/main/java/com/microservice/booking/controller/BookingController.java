@@ -7,6 +7,7 @@ import com.microservice.booking.dto.CheckInRequest;
 
 import com.microservice.booking.service.BookingService;
 
+import com.microservice.booking.service.PendingBookinService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,8 @@ public class BookingController {
 
     @Autowired
     private BookingService service;
-
+@Autowired
+private PendingBookinService  pending;
 
     @PostMapping
     public BookingResponse createBooking(
@@ -49,16 +51,9 @@ public class BookingController {
 
     @GetMapping
     public List<BookingResponse>
-    searchBookings(
-
-            @RequestParam(
-                    required=false
-            )
-            Integer sportCourtId,
-
-            @RequestParam(
-                    required=false
-            )
+    searchBookings(@RequestParam(
+                    required=false)
+            Integer sportCourtId, @RequestParam(required=false)
             Integer customerId){
 
         return service.searchBookings(
@@ -67,5 +62,11 @@ public class BookingController {
         );
 
     }
+    @PostMapping("/process-pending")
+    public String processPending() {
 
+        pending.processPending();
+
+        return "Reservas pendientes procesadas";
+    }
 }
