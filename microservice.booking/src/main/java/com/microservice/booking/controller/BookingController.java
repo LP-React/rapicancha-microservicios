@@ -2,9 +2,14 @@ package com.microservice.booking.controller;
 
 import com.microservice.booking.dto.BookingRequest;
 import com.microservice.booking.dto.BookingResponse;
+
 import com.microservice.booking.dto.CheckInRequest;
+
 import com.microservice.booking.service.BookingService;
+
+import com.microservice.booking.service.PendingBookinService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +20,7 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService service;
+    private final PendingBookinService pending;
 
     @PostMapping
     public BookingResponse createBooking(@RequestBody BookingRequest request) {
@@ -27,7 +33,15 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingResponse> searchBookings(@RequestParam(required = false) Integer sportCourtId, @RequestParam(required = false) Integer customerId) {
+    public List<BookingResponse> searchBookings(
+            @RequestParam(required = false) Integer sportCourtId,
+            @RequestParam(required = false) Integer customerId) {
         return service.searchBookings(sportCourtId, customerId);
+    }
+
+    @PostMapping("/process-pending")
+    public String processPending() {
+        pending.processPending();
+        return "Reservas pendientes procesadas";
     }
 }
